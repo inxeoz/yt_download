@@ -1,12 +1,11 @@
 from yt_dlp import YoutubeDL
 from urllib.parse import parse_qs, urlparse
-import os
 import DownloadSingleAud
+import folder
 
+from pathlib import Path
 
-def audio_exists(title):
-    """Check if the audio file already exists in the folder."""
-    return os.path.exists(f"{title}.mp3")
+output_path = Path.home() / "Downloads" / "my_Audio"
 
 
 def get_playlist_urls(playlist_url):
@@ -34,23 +33,28 @@ def get_playlist_urls(playlist_url):
             result = ydl.extract_info(playlist_url, download=False)
 
             if 'entries' in result:
+                count  = 1
+                new_count =0
                 for entry in result['entries']:
                     if entry:
                         video_id = entry['id']
                         video_url = f'https://www.youtube.com/watch?v={video_id}'
                         video_title = entry.get('title', 'Untitled')
 
-                        if audio_exists(video_title):
-                            print(f"Skipping {video_title}, audio already exists.")
+                        if folder.contains_song(output_path, video_title):
+                            print(f"\nSkipping {video_title}, audio already exists. --> ${count}")
+                            count +=1
                             continue
 
                         video_urls.append({'url': video_url, 'title': video_title})
+                        new_count +=1
 
-                print(f"\nSuccessfully extracted {len(video_urls)} video URLs")
+                print(f"\nSuccessfully extracted {len(video_urls)} video URLs with new {new_count}")
 
                 for i, video in enumerate(video_urls, 1):
                     try:
                         DownloadSingleAud.singleAUDIO(video['url'])
+                        print("download_count ", i, "\n")
                     except Exception as e:
                         print(f"Error converting {video['title']}: {e}, skipping...")
 

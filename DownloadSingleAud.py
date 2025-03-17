@@ -9,17 +9,40 @@ def singleAUDIO(
     # Create the output directory if it doesn't exist
     os.makedirs(output_path, exist_ok=True)
 
-    # Options for yt-dlp
     ydl_opts = {
-        'format': 'bestaudio/best',
-         'postprocessors': [{
+        'format': 'bestaudio/best',  # Selects the best available audio format
+        'postprocessors': [
+            {
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
-                'preferredquality': '320',  # Highest MP3 quality
-            }],
-        'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s'),  # Specify the output template to include the path
-        'verbose': False  # Set to True if you want to see detailed progress
+                'preferredquality': '320',  # Force highest MP3 quality
+            },
+            {
+                'key': 'FFmpegMetadata'  # Retains metadata (artist, title, etc.)
+            },
+            {
+                'key': 'EmbedThumbnail'  # Embeds the thumbnail into the MP3 file
+            }
+        ],
+        'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s'),  # Custom output filename
+        'writethumbnail': True,  # Download thumbnail for embedding
+        'embedthumbnail': True,  # Ensure thumbnails are embedded in MP3
+        'addmetadata': True,  # Add metadata to the file
+        'prefer_ffmpeg': True,  # Ensures FFmpeg is used for processing
+        'verbose': False,  # Set to True for debugging
     }
+
+    # Options for yt-dlp
+    # ydl_opts = {
+    #     'format': 'bestaudio/best',
+    #      'postprocessors': [{
+    #             'key': 'FFmpegExtractAudio',
+    #             'preferredcodec': 'mp3',
+    #             'preferredquality': '320',  # Highest MP3 quality
+    #         }],
+    #     'outtmpl': os.path.join(output_path, '%(title)s.%(ext)s'),  # Specify the output template to include the path
+    #     'verbose': False  # Set to True if you want to see detailed progress
+    # }
 
     try:
         print(f"Starting download from: {url}")
